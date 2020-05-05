@@ -1,11 +1,15 @@
+use std::error::Error;
 use std::fs::File;
 use std::io::BufRead;
 use std::io::BufReader;
+
+use exitfailure::ExitFailure;
+use failure::ResultExt;
 use structopt::StructOpt;
 
-fn main() -> std::io::Result<()> {
+fn main() -> Result<(), ExitFailure> {
     let args = Cli::from_args();
-    let f = File::open(args.path)?;
+    let f = File::open(args.path).with_context(|_| format!("could not open file"))?;
     let reader = BufReader::new(f);
 
     for line in reader.lines() {
