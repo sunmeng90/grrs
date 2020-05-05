@@ -1,14 +1,23 @@
-use std::fs;
+use std::fs::File;
+use std::io::BufRead;
+use std::io::BufReader;
 use structopt::StructOpt;
 
-fn main() {
+fn main() -> std::io::Result<()> {
     let args = Cli::from_args();
-    let content = fs::read_to_string(&args.path).expect("could not read the file");
-    for line in content.lines() {
-        if line.starts_with(&args.pattern) {
-            println!("{}", line);
+    let f = File::open(args.path)?;
+    let reader = BufReader::new(f);
+
+    for line in reader.lines() {
+        match line {
+            Ok(text) if text.starts_with(&args.pattern) => {
+                println!("{}", text);
+            }
+            Ok(_) => (), // match line that not having the given pattern
+            Err(_) => (),
         }
     }
+    Ok(())
 }
 
 #[derive(StructOpt)]
